@@ -8,32 +8,38 @@ import { stitchColors } from "@/constants/theme";
 import { apiFetch } from "@/lib/api";
 
 type CheckItem = {
+  timing?: string;
+  action?: string;
   item?: string;
   title?: string;
   importance?: string;
-};
-
-type Category = {
-  name: string;
-  items: CheckItem[];
 };
 
 export default function VisitChecklistScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const announcementId = id ?? "sh_301076";
 
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [items, setItems] = useState<CheckItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     apiFetch(`/visit-checklist?announcement_id=${announcementId}`)
-      .then((data) => setCategories(data.categories ?? []))
+      .then((data) => {
+        // checklist (flat) 또는 categories[].items 둘 다 지원
+        if (Array.isArray(data.checklist)) {
+          setItems(data.checklist);
+        } else if (Array.isArray(data.categories)) {
+          const flat: CheckItem[] = [];
+          for (const cat of data.categories) {
+            for (const it of cat.items ?? []) flat.push(it);
+          }
+          setItems(flat);
+        }
+      })
       .catch(() => setError("체크리스트를 불러올 수 없습니다."))
       .finally(() => setLoading(false));
   }, [announcementId]);
-
-  const totalItems = categories.reduce((acc, c) => acc + c.items.length, 0);
 
   return (
     <>
@@ -44,10 +50,10 @@ export default function VisitChecklistScreen() {
           <Text className="font-section-header text-section-header text-on-surface flex-1">
             임장 체크리스트
           </Text>
-          {totalItems > 0 ? (
+          {items.length > 0 ? (
             <View className="rounded-full bg-primary/10 px-2 py-0.5">
               <Text className="font-caption-caps text-caption-caps text-primary">
-                {totalItems}개 항목
+                {items.length}개 항목
               </Text>
             </View>
           ) : null}
@@ -62,46 +68,54 @@ export default function VisitChecklistScreen() {
             <MaterialIcons name="error-outline" size={48} color={stitchColors.error} />
             <Text className="mt-4 text-center text-body-main text-error">{error}</Text>
           </View>
+        ) : items.length === 0 ? (
+          <View className="flex-1 items-center justify-center px-container-padding">
+            <MaterialIcons
+              name="check-circle-outline"
+              size={48}
+              color={stitchColors["on-surface-variant"]}
+            />
+            <Text className="mt-4 text-center text-body-main text-on-surface-variant">
+              체크리스트가 없습니다.
+            </Text>
+          </View>
         ) : (
           <ScrollView
             className="flex-1"
-            contentContainerClassName="px-container-padding pt-stack-gap-lg pb-section-margin gap-section-margin"
+            contentContainerClassName="px-container-padding pt-stack-gap-lg pb-section-margin gap-stack-gap-md"
             showsVerticalScrollIndicator={false}>
-            {categories.map((cat) => (
-              <View key={cat.name} className="gap-stack-gap-md">
-                <Text className="font-section-header text-section-header text-on-surface">
-                  {cat.name}
-                </Text>
-                <View className="overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest">
-                  {cat.items.map((item, i) => (
-                    <View key={i}>
-                      {i > 0 ? (
-                        <View className="h-px bg-outline-variant/50 mx-container-padding" />
-                      ) : null}
-                      <View className="flex-row items-start gap-3 p-container-padding">
-                        <View className="mt-0.5 h-5 w-5 items-center justify-center rounded-full border-2 border-primary/40">
-                          <MaterialIcons
-                            name="check"
-                            size={12}
-                            color={stitchColors["on-surface-variant"]}
-                          />
-                        </View>
-                        <View className="flex-1">
-                          <Text className="font-body-main text-body-main text-on-surface">
-                            {item.item ?? item.title}
-                          </Text>
-                          {item.importance ? (
-                            <Text className="mt-0.5 font-data-label text-data-label text-on-surface-variant">
-                              {item.importance}
-                            </Text>
-                          ) : null}
-                        </View>
-                      </View>
+            <View className="overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest">
+              {items.map((item, i) => (
+                <View key={i}>
+                  {i > 0 ? (
+                    <View className="h-px bg-outline-variant/50 mx-container-padding" />
+                  ) : null}
+                  <View className="flex-row items-start gap-3 p-container-padding">
+                    <View className="mt-0.5 h-5 w-5 items-center justify-center rounded-full border-2 border-primary/40">
+                      <MaterialIcons
+                        name="check"
+                        size={12}
+                        color={stitchColors["on-surface-variant"]}
+                      />
                     </View>
-                  ))}
+                    <View className="flex-1">
+                      <Text className="font-body-main text-body-main text-on-surface">
+                        {item.action ?? item.item ?? item.title}
+                      </Text>
+                      {item.timing ? (
+                        <Text className="mt-0.5 font-data-label text-data-label text-on-surface-variant">
+                          {item.timing}
+                        </Text>
+                      ) : item.importance ? (
+                        <Text className="mt-0.5 font-data-label text-data-label text-on-surface-variant">
+                          {item.importance}
+                        </Text>
+                      ) : null}
+                    </View>
+                  </View>
                 </View>
-              </View>
-            ))}
+              ))}
+            </View>
           </ScrollView>
         )}
       </SafeAreaView>
