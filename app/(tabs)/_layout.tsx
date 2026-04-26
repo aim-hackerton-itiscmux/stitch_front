@@ -1,33 +1,54 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { Tabs } from "expo-router";
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { stitchColors } from "@/constants/theme";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
-        tabBarButton: HapticTab,
+        tabBarActiveTintColor: stitchColors.primary,
+        tabBarInactiveTintColor: stitchColors["on-surface-variant"],
+        tabBarStyle: {
+          backgroundColor: stitchColors["surface-container-lowest"],
+          borderTopColor: stitchColors["outline-variant"],
+        },
+        tabBarLabelStyle: { fontSize: 10, fontWeight: "500" },
       }}>
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: "홈",
+          tabBarIcon: ({ color, size }) => <MaterialIcons name="home" color={color} size={size} />,
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="listings"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: "공고",
+          tabBarIcon: ({ color, size }) => <MaterialIcons name="list-alt" color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="analysis"
+        options={{
+          title: "분석",
+          tabBarIcon: ({ color, size }) => <MaterialIcons name="analytics" color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="prep"
+        options={{
+          title: "준비",
+          tabBarIcon: ({ color, size }) => <MaterialIcons name="menu-book" color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="my-subscriptions"
+        options={{
+          title: "내 청약",
+          tabBarIcon: ({ color, size }) => <MaterialIcons name="person" color={color} size={size} />,
         }}
       />
     </Tabs>
