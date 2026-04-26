@@ -45,8 +45,11 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!session) return;
-    Promise.all([api.profile.get(), api.recommendations.list()])
+    if (!session) { setLoading(false); return; }
+    Promise.all([
+      api.profile.get(),
+      api.recommendations.list().catch(() => [] as RecommendedAnnouncement[]),
+    ])
       .then(([p, r]) => {
         setProfile(p);
         const rAny = r as unknown as Record<string, RecommendedAnnouncement[]> | RecommendedAnnouncement[];
