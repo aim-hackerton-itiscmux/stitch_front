@@ -22,17 +22,20 @@ export function useAuth() {
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(typeof window === "undefined" ? false : true);
   const segments = useSegments();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setLoading(false);
-    });
-
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, s) => {
+    if (typeof window === "undefined") return;
+    // Use INITIAL_SESSION event to gate loading — this fires after Supabase
+    // has processed both stored sessions AND URL hash tokens (access_token in hash).
+    // Relying on getSession() alone causes a race: it resolves before the URL
+    // hash is parsed, so the redirect fires before the token is consumed.
+    const { data: listener } = supabase.auth.onAuthStateChange((event, s) => {
       setSession(s);
+      if (event === "INITIAL_SESSION") {
+        setLoading(false);
+      }
     });
 
     return () => listener.subscription.unsubscribe();

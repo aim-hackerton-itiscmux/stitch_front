@@ -43,7 +43,10 @@ export default function ListingsScreen() {
     if (!session) return;
     api.announcements
       .list()
-      .then(setListings)
+      .then((data) => {
+        const d = data as unknown as Record<string, Announcement[]> | Announcement[];
+        setListings(Array.isArray(d) ? d : (d?.data ?? d?.items ?? d?.announcements ?? []));
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [session]);

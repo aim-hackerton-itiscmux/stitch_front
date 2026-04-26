@@ -47,7 +47,11 @@ export default function HomeScreen() {
   useEffect(() => {
     if (!session) return;
     Promise.all([api.profile.get(), api.recommendations.list()])
-      .then(([p, r]) => { setProfile(p); setRecommended(r); })
+      .then(([p, r]) => {
+        setProfile(p);
+        const rAny = r as unknown as Record<string, RecommendedAnnouncement[]> | RecommendedAnnouncement[];
+        setRecommended(Array.isArray(rAny) ? rAny : (rAny?.recommendations ?? rAny?.data ?? rAny?.items ?? []));
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [session]);

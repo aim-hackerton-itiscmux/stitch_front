@@ -26,7 +26,11 @@ export default function MySubscriptionsScreen() {
   useEffect(() => {
     if (!session) { setLoading(false); return; }
     Promise.all([api.profile.get(), api.favorites.list()])
-      .then(([p, f]) => { setProfile(p); setFavorites(f); })
+      .then(([p, f]) => {
+        setProfile(p);
+        const fAny = f as unknown as Record<string, Favorite[]> | Favorite[];
+        setFavorites(Array.isArray(fAny) ? fAny : (fAny?.favorites ?? fAny?.data ?? fAny?.items ?? []));
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [session]);
