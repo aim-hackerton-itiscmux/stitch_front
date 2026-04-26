@@ -1,0 +1,6 @@
+.stitch/
+.expo/
+dist/
+android/
+ios/
+*.log
