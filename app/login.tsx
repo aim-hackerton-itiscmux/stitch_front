@@ -27,7 +27,13 @@ export default function LoginScreen() {
   async function sendOtp() {
     if (!email.trim()) return;
     setLoading(true);
-    const { error } = await supabase.auth.signInWithOtp({ email: email.trim() });
+    const redirectTo =
+      process.env.EXPO_PUBLIC_SITE_URL ??
+      (typeof window !== "undefined" ? window.location.origin : "http://localhost:3000");
+    const { error } = await supabase.auth.signInWithOtp({
+      email: email.trim(),
+      options: { emailRedirectTo: redirectTo },
+    });
     setLoading(false);
     if (error) {
       Alert.alert("오류", error.message);
