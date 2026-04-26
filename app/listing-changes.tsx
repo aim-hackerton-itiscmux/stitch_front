@@ -8,7 +8,7 @@ import { stitchColors } from "@/constants/theme";
 import { apiFetch } from "@/lib/api";
 
 type Change = {
-  change_type: string;
+  change_type?: string;
   description?: string;
   changed_at?: string;
   old_value?: string;
@@ -25,7 +25,10 @@ export default function ListingChangesScreen() {
 
   useEffect(() => {
     apiFetch(`/announcement-changes?announcement_id=${announcementId}`)
-      .then((data) => setChanges(data.changes ?? []))
+      .then((data) => {
+        // flat 배열 우선, 없으면 changes fallback
+        setChanges(data.flat ?? data.changes ?? []);
+      })
       .catch(() => setError("변경 내역을 불러올 수 없습니다."))
       .finally(() => setLoading(false));
   }, [announcementId]);
