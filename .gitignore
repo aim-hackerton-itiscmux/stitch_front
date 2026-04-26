@@ -21,6 +21,9 @@ expo-env.d.ts
 # Metro
 .metro-health-check*
 
+# Stitch raw exports (from Stitch MCP)
+.stitch/
+
 # debug
 npm-debug.*
 yarn-debug.*
