@@ -50,7 +50,7 @@ export default function ScoreScreen() {
   const [recalcLoading, setRecalcLoading] = useState(false);
 
   useEffect(() => {
-    if (!session) return;
+    if (!session) { setLoading(false); return; }
     api.score
       .get()
       .then(setResult)

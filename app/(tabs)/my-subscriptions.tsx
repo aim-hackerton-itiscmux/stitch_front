@@ -24,7 +24,7 @@ export default function MySubscriptionsScreen() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!session) return;
+    if (!session) { setLoading(false); return; }
     Promise.all([api.profile.get(), api.favorites.list()])
       .then(([p, f]) => { setProfile(p); setFavorites(f); })
       .catch(console.error)
@@ -90,7 +90,8 @@ export default function MySubscriptionsScreen() {
             <View className="gap-3">
               {favorites.map((fav) => {
                 const ann = fav.announcement;
-                const dLabel = daysUntil(ann.apply_end);
+                if (!ann) return null;
+                const dLabel = daysUntil(ann.apply_end ?? null);
                 return (
                   <Pressable
                     key={fav.id}

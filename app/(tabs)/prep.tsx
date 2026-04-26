@@ -48,7 +48,7 @@ export default function PrepScreen() {
   const [checked, setChecked] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    if (!session) return;
+    if (!session) { setLoading(false); return; }
     api.preparation
       .get()
       .then((data) => {
