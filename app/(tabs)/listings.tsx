@@ -40,7 +40,7 @@ export default function ListingsScreen() {
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    if (!session) { setLoading(false); return; }
+    if (!session) return;
     api.announcements
       .list()
       .then(setListings)

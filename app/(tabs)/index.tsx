@@ -45,7 +45,7 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!session) { setLoading(false); return; }
+    if (!session) return;
     Promise.all([api.profile.get(), api.recommendations.list()])
       .then(([p, r]) => { setProfile(p); setRecommended(r); })
       .catch(console.error)
